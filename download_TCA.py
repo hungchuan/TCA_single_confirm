@@ -184,7 +184,7 @@ def TCA_read(filename):
     TCA_Items = new_df.shape[0]
     
     log('TCA_Items=',TCA_Items)
-    TCA_df = pd.DataFrame(columns=['Unique Reference Number','Claim RD Review Date','Workshop Name','Model No','Product No','Repair Result','Regular SW number IN','Regular SW number OUT','Total Spare Part Cost (1-4 + Small) (Local Currency)','Symptom Code 1','Workshop Comment','Fault Description Text'])
+    TCA_df = pd.DataFrame(columns=['Unique Reference Number','Claim RD Review Date','Workshop Name','Model No','Product No','Repair Result','Regular SW number IN','Regular SW number OUT','Total Spare Part Cost (1-4 + Small) (Local Currency)','Symptom Code 1','Workshop Comment','Fault Description Text','Repeat Claim?'])
     df_column=TCA_df.columns.values.tolist()
     for i in df_column:
         TCA_df[i]=new_df[i]  
