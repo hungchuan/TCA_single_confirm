@@ -47,6 +47,8 @@ def read_config (config):
             retmap ['username'] = v.strip ()
         if "PASSWORD" == k.strip ():
             retmap ['password'] = v.strip ()
+        if "TIMEDELTA" == k.strip ():
+            retmap ['timedelta'] = v.strip ()            
         if "MOZILLA_PROFILE_PATH" == k.strip ():
             retmap ['mozilla_profile_path'] = v.strip ()
         if "PROJECT_IDS" == k.strip ():

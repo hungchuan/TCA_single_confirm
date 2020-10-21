@@ -12,6 +12,7 @@ import pygsheets
 import numpy as np
 import shutil 
 import pdb
+import random
 from selenium import webdriver
 from googletrans import Translator
 from datetime import datetime, date, timedelta
@@ -75,6 +76,7 @@ def waiting_for_update(br,text1):
     return result_info
     
 def waiting_for_TCA_update(br,xpath):
+    print("waiting_for_TCA_update button start")
     button = False
     for i in range(0,10):
         time.sleep(1) 
@@ -672,6 +674,17 @@ def main (args):
     print('args = ',args)
     projdata = []
     
+       
+    CURRENT_PACKAGE_DIRECTORY = os.path.abspath('.')    
+    timestamp_filename ='timestamp.xlsx'
+    timestamp_filename=os.path.join(CURRENT_PACKAGE_DIRECTORY,timestamp_filename)
+    print("timestamp_filename=",timestamp_filename)
+    is_exist=os.path.exists (timestamp_filename) 
+    
+    if (False==is_exist):
+        timestamp_df = pd.DataFrame(columns=['start','end'])
+        timestamp_df.to_excel(timestamp_filename,index=False)   
+    
     try:
         if (args[1]=="debug"):
            log = log_print
@@ -680,18 +693,29 @@ def main (args):
 
     try:
         if (args[1]=="confirm"):
+            try:
+                if (args[2]=="debug"):
+                   log = log_print
+                   log("=============debug=============")
+            except:
+                log = Emptyprintf
+        
             TCA_confirm_all(config)
             return False    
     except:
         print("")
         
+    config_remap = TCA.read_config (config)
     #sel = input("pause")
                 
     now = datetime.now()
     date= now.strftime("%Y")+now.strftime("%m")+now.strftime("%d")    
-    time_begin = now - timedelta(days=60)  # time_begin
+    
+    #time_begin = now - timedelta(days=60)  # time_begin
+    time_begin = now - timedelta(days=int(config_remap['timedelta']))  # time_begin
     time_end = now - timedelta(days=1)  # time_begin
     #time_end = time_end.date()
+   
     
     CURRENT_PACKAGE_DIRECTORY = os.path.abspath('.')    
     PACKAGE_DIRECTORY = CURRENT_PACKAGE_DIRECTORY + '\download' 
@@ -795,9 +819,37 @@ def main (args):
     if (is_analysis_file_exist==False):
         TCA_backup(download_file)
     print("==============Done==============")
-        
+   
+##=================================================================================================================     
+def TCA_timestamp(start,end): 
+    CURRENT_PACKAGE_DIRECTORY = os.path.abspath('.')   
+    timestamp_filename ='timestamp.xlsx'
+    timestamp_filename=os.path.join(CURRENT_PACKAGE_DIRECTORY,timestamp_filename)
+    df_timestamp = pd.read_excel(timestamp_filename)
+    df_timestamp.loc[len(df_timestamp)]=[ start, end ]
+    df_timestamp.to_excel(timestamp_filename,index=False)    
+##=================================================================================================================     
+def TCA_timestamp_to_GS(start,end): 
+    timestamp_df=download_from_google('TCA2','Timestamp')   
+    timestamp_df=timestamp_df.append({'start' : start , 'end' : end} , ignore_index=True)
+    TCA_upload_to_google('TCA2','Timestamp',timestamp_df) # upload to google sheet
+##=================================================================================================================  
+  
+def TCA_confirm_delay(delay_time): 
+    print('delay_time = ',delay_time)
+    while (delay_time>0):
+        print ('waiting for confirmmation Count down: %d' % delay_time)
+        delay_time -= 1
+        time.sleep (1)
+##=================================================================================================================         
 def TCA_confirm_all(config):
+
+    delay_sec= random.randint(1,10)
+    delay_sec = delay_sec*60;
+    TCA_confirm_delay(delay_sec)
+    
     print("==============TCA_confirm_all==============")
+        
     config = TCA.read_config (config)
 
     options = webdriver.ChromeOptions()
@@ -851,26 +903,51 @@ def TCA_confirm_all(config):
     log('row 1=',button)
     if (button==False):
         return False      
+
+    start_time = datetime.now()
+    print('start_time = ',start_time)
     
     while (button!=False):      
-        TCA_click_select_all(br,config)        
+        
+        #TCA_click_select_one(br,config)    
+        #TCA_click_select_all(br,config)        
 
         button = waiting_for_TCA_update(br,config ['xpath_row1']) # check row 1 exist
         log('row 1=',button)
         
+        if (button==False):
+            return False  
+        button.click() #click select all     
+    
+        #sel = input("pause")
+        
         if (button.is_selected()):
             print("click confirm")
         else:
-            TCA_click_select_all(br,config)        
+            button = waiting_for_TCA_update(br,config ['xpath_row1']) # check row 1 exist
+            log('row 1=',button)
             
+            if (button==False):
+                return False  
+            button.click() #click select all            
         
+            #TCA_click_select_one(br,config)    
+            #TCA_click_select_all(br,config)        
+                    
         button = waiting_for_TCA_update(br,config ['xpath_confirm']) # btnConfirm  
         log('btnConfirm=',button)   
         #sel = input("pause")        
         button.click() #click confirm 
         time.sleep (5)         
+        TCA_confirm_delay(random.randint(60,75))         
         button = waiting_for_TCA_update(br,config ['xpath_row1']) # check row 1 exist 
-            
+     
+    
+    end_time = datetime.now()
+    print('end_time = ',end_time)  
+    TCA_timestamp(start_time,end_time)   
+    TCA_timestamp_to_GS(start_time,end_time)       
+    
     br.quit ()
     print("==============TCA_confirm_all_finish==============")
     return True
@@ -878,6 +955,21 @@ def TCA_confirm_all(config):
 def TCA_click_select_all(br,config):
     button = waiting_for_TCA_update(br,config ['xpath_select_all']) # select all
     log('select all=',button)
+    if (button==False):
+        return False  
+    button.click() #click select all           
+
+    if (button.is_selected()):
+        log("selected")
+    else:
+        button.click() #click select all  
+
+def TCA_click_select_one(br,config):
+    print("==============TCA_click_select_one==============")
+    #button = waiting_for_TCA_update(br,config ['XPath_row1']) # select one
+    button = waiting_for_TCA_update(br,config ['xpath_select_all']) # select all
+    button = waiting_for_TCA_update(br,config ['XPath_row1']) # select one
+    log('select one=',button)
     if (button==False):
         return False  
     button.click() #click select all           
