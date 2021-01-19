@@ -6,6 +6,7 @@ import re
 import xlrd
 #import splinter
 import tca as TCA #URT
+import google_translater as google_trans
 import time
 import pandas as pd
 import pygsheets
@@ -13,8 +14,9 @@ import numpy as np
 import shutil 
 import pdb
 import random
+import inspect
 from selenium import webdriver
-from googletrans import Translator
+#from googletrans import Translator
 from datetime import datetime, date, timedelta
 from print_log import log_print,Emptyprintf
 from fnmatch import fnmatch, fnmatchcase
@@ -26,34 +28,17 @@ ALL_PROBLEMS = "/media/sf_linux-share/all.txt"
 PROBLEM = "~/Downloads/TCA.xlsx"
 log = Emptyprintf
 
+def printLineFileFunc():
+    callerframerecord = inspect.stack()[1]   
+    frame = callerframerecord[0]
+    info = inspect.getframeinfo(frame)
+    print ("File = ",info.filename,",Function = ",info.function,",Line = ",info.lineno)
+    #print (info.filename)                      # __FILE__    
+    #print (info.function)                       # __FUNCTION__
+    #print (info.lineno)                          # __LINE__
+
 def isNaN(num):
-    return num != num
-    
-def Google_Translator(src_in,dest_in,df_in):
-    #df_in=df_in.fillna("")
-    #print("df_in=",df_in)
-    translator = Translator()
-    # src來源語言，dest要翻譯語言，如果要找其他語言可以參考說明文件
-    n=0 
-    str="sorun : tv açılmamaktadır cevap : servise yönlendirildi"   
-    str_out=translator.translate(str, src = src_in, dest = dest_in)
-    print(str_out.text)
-    for i in df_in:         
-        #if (isNaN(df_in[n])==False):   
-        if (len(df_in[n])>1):  
-            print(df_in[n])  
-            try:
-                str_out=translator.translate(df_in[n], src = src_in, dest = dest_in)
-            except:    
-                n=n;            
-
-            df_in[n] = str_out.text
-        n=n+1    
-    #print(str_out.text)
-    #sel = input("pause")
-    return df_in
-    
-
+    return num != num    
 
 def DF2List(df_in):
     train_data = np.array(df_in)#np.ndarray()
@@ -491,6 +476,7 @@ def filter_fault_description(df_in):
     df_in = df_in.str.replace("\r"," ")
     df_in = df_in.str.replace("<br/>"," ")
     df_in = df_in.str.replace("&"," ")
+    df_in = df_in.str.replace("#"," ")
     
     find_index = df_in.str.find("[symptom description]")
     
@@ -514,6 +500,7 @@ def filter_Workshop_Comment(df_in):
     df_in = df_in.str.replace("\n"," ")
     df_in = df_in.str.replace("\r"," ")
     df_in = df_in.str.replace("<br/>"," ")
+    df_in = df_in.str.replace("#"," ")
     
     find_index = df_in.str.find("workdscr")
 
@@ -667,13 +654,13 @@ def TCA_check_tca_in_symptom(df_in):
 
     #df_in["check tca"]=check_tca_df
     return check_tca_df   
+
     
 def main (args):
     global log
     config = 'config'
     print('args = ',args)
     projdata = []
-    
        
     CURRENT_PACKAGE_DIRECTORY = os.path.abspath('.')    
     timestamp_filename ='timestamp.xlsx'
@@ -770,12 +757,12 @@ def main (args):
         
         Workshop_Comment_df=TCA_read_df['Workshop Comment']
         Workshop_Comment_df = filter_Workshop_Comment(Workshop_Comment_df)  
-        Workshop_Comment_df = Google_Translator("auto","en",Workshop_Comment_df)   
+        Workshop_Comment_df = google_trans.Google_Translator("auto","en",Workshop_Comment_df)   
         TCA_read_df['Workshop Comment']=Workshop_Comment_df      
         
         Description_df=TCA_read_df['Fault Description Text']
         Description_df = filter_fault_description(Description_df)    
-        Description_df = Google_Translator("auto","en",Description_df)   
+        Description_df = google_trans.Google_Translator("auto","en",Description_df)   
         TCA_read_df['Fault Description Text']=Description_df 
     else:         
         TCA_read_df = TCA_read_TCA_analysis(is_analysis_file_exist)
