@@ -4,6 +4,7 @@ import time
 import xlrd
 from selenium import webdriver
 from time import sleep
+import tca as TCA
 
 #GT_URL="https://translate.google.com/"
 GT_URL="https://translate.google.com/?sl=auto&tl=en&text="
@@ -27,11 +28,17 @@ def Translator (br,data_in):
     GT_URL_Text = GT_URL+data_in
     br.get(GT_URL_Text) 
     
+    config = 'config'    
+    config = TCA.read_config (config)
+    
+    button = False
+    
     for i in range(0,10):
         time.sleep(1) 
         print ('waiting for update Count: %d' % i)
         try:
-            button = br.find_element_by_xpath('//*[@id="yDmH0d"]/c-wiz/div/div[2]/c-wiz/div[2]/c-wiz/div[1]/div[2]/div[2]/c-wiz[2]/div[5]/div/div[1]/span[1]/span/span')
+            button = br.find_element_by_xpath(config ['xpath_translate'])
+                                               
         except:
             continue
         break

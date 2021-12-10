@@ -747,7 +747,9 @@ def main (args):
     
     if (is_analysis_file_exist==False):
         download_file = TCA_get_filename(PACKAGE_DIRECTORY)    
-        TCA_read_df = TCA_read(download_file)       
+        TCA_read_df = TCA_read(download_file)     
+        TCA_backup(download_file)        
+        
     
     ###翻譯================================================
     if (is_analysis_file_exist==False):
@@ -803,8 +805,7 @@ def main (args):
     #pdb.set_trace() 
     TCA_upload_to_google('TCA2','raw data2',TCA_new2_df) # upload to google sheet
     
-    if (is_analysis_file_exist==False):
-        TCA_backup(download_file)
+
     print("==============Done==============")
    
 ##=================================================================================================================     

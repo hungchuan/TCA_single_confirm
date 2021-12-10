@@ -77,7 +77,8 @@ def read_config (config):
            retmap ['xpath_select_all'] = v.strip ()    
         if "XPath_confirm" == k.strip ():
            retmap ['xpath_confirm'] = v.strip ()    
-            
+        if "XPath_translate" == k.strip ():
+           retmap ['xpath_translate'] = v.strip ()                
     return retmap
     
 
