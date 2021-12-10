@@ -74,6 +74,22 @@ def waiting_for_TCA_update(br,xpath):
     print(xpath)
     print("waiting_for_TCA_update button=",button)
     return button    
+
+def Check_excel_file(PACKAGE_DIRECTORY):
+    print (PACKAGE_DIRECTORY)
+    try:
+        items = os.listdir(PACKAGE_DIRECTORY)
+    except:
+        return (0)      
+            
+    newlist = []
+    for names in items:
+        if names.endswith(".xlsx"):
+            newlist.append(names)
+           
+    print (len(newlist))
+    return (len(newlist))
+
     
 def download_TCA (br, filename, PACKAGE_DIRECTORY, config):
 
@@ -112,8 +128,10 @@ def download_TCA (br, filename, PACKAGE_DIRECTORY, config):
     log('yes = ',button)
     button.click() #click yes   
     
-    #sel = input("pause")    
-    
+    while (Check_excel_file(PACKAGE_DIRECTORY)==0):
+        print('delay 1s for file download')
+        time.sleep(1)
+  
     return button     
     
     '''    
