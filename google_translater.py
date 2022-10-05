@@ -5,9 +5,22 @@ import xlrd
 from selenium import webdriver
 from time import sleep
 import tca as TCA
+import inspect
+#import pyperclip as pc
+
 
 #GT_URL="https://translate.google.com/"
 GT_URL="https://translate.google.com/?sl=auto&tl=en&text="
+
+def printLineFileFunc():
+    callerframerecord = inspect.stack()[1]   
+    frame = callerframerecord[0]
+    info = inspect.getframeinfo(frame)
+    print ("File = ",info.filename,",Function = ",info.function,",Line = ",info.lineno)
+    #print (info.filename)                      # __FILE__    
+    #print (info.function)                       # __FUNCTION__
+    #print (info.lineno)                          # __LINE__
+
 
 def waiting_for_TCA_update(br,xpath):
     print("waiting_for_TCA_update button start")
@@ -33,9 +46,12 @@ def Translator (br,data_in):
     
     button = False
     
+    #sel = input("pause 58")    
+    
     for i in range(0,10):
         time.sleep(1) 
-        print ('waiting for update Count: %d' % i)
+        print ('waiting for update Count: %d'% i)
+        printLineFileFunc()
         try:
             button = br.find_element_by_xpath(config ['xpath_translate'])
                                                
@@ -82,10 +98,10 @@ def Google_Translator(src_in,dest_in,df_in):
             print(df_in[n])  
 
             str_out = Translator(br,df_in[n])
-            print ('n_out= %d' % n)
-            print(str_out.text)  
-
-            df_in[n] = str_out.text
+            if (str_out!=False):    
+                print ('n_out= %d' % n)
+                print(str_out.text)  
+                df_in[n] = str_out.text
         n=n+1    
     
     '''

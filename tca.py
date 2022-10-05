@@ -20,19 +20,39 @@ import os
 import re
 import time
 import xlrd
+import SliderVerificationCode as Slider
+import pyautogui
 
+#import Slider
 
 TCA_URL="https://gsp.tpv-tech.com"
 
 def login (br, config):
+
     print ('Entering Login')
     br.get (TCA_URL + "/Login.aspx")
+    br.set_window_size(1280, 800)
     elem_user = br.find_element_by_xpath(config ['xpath_username'])
     elem_user.send_keys(config ['username']) #瀏覽器版本不匹配的時候這裡可能報錯
     elem_pwd = br.find_element_by_xpath(config ['xpath_password'])
     elem_pwd.send_keys(config ['password'])
     button = br.find_element_by_xpath(config ['xpath_log_in'])   
     button.click()
+    time.sleep (3)
+    
+    done = False
+    ReTry = 0
+    while (False == done) and (ReTry<10):
+        time.sleep (3)
+        ReTry=ReTry+1
+        Verify = Slider.SliderVerificationCode()
+        Verify.set_broswer(br)
+        Verify.verify()    
+        done = wait_for_xpath(br,config ['xpath_cashout'])
+        if (False == done):
+            pyautogui.press('enter')
+           
+   
     print ('Leaving Login')
 
 
@@ -92,6 +112,7 @@ def xpath_select_dropdown (br, xpath, text):
 def xpath_click_first_checkbox (br, xpath):
     br.find_by_xpath (xpath).first.click ()
 
+'''
 def wait_for_xpath (br, xpath):
     done = False
     count = 0
@@ -103,6 +124,21 @@ def wait_for_xpath (br, xpath):
             print ('Retrying for xpath %s .. count : %d' % (xpath, count))
             count += 1
             time.sleep (1)
+'''
+
+def wait_for_xpath(br,xpath):
+    done = False
+    for i in range(0,10):
+        time.sleep(1) 
+        print ('waiting for update Count: %d' % i)
+        try:
+            done = br.find_element_by_xpath(xpath)
+        except:
+            continue
+        break
+    print(xpath)
+    print("waiting_for_TCA_update button=",done)
+    return done  
 
 
 def wait_for_update_progress (br, xpath):

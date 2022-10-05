@@ -20,6 +20,7 @@ from selenium import webdriver
 from datetime import datetime, date, timedelta
 from print_log import log_print,Emptyprintf
 from fnmatch import fnmatch, fnmatchcase
+import SliderVerificationCode
 
 #PROJECT_IDS = [1429]
 # PROJECT_IDS = [712, 746, 750]
