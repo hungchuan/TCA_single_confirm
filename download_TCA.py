@@ -822,6 +822,8 @@ def main (args):
     #TCA_upload_to_google('TCA2','raw data2',df_zero) # upload to google sheet
     #pdb.set_trace() 
     TCA_upload_to_google('TCA2','raw data2',TCA_new2_df) # upload to google sheet
+    time.sleep (5)
+    TCA_uploadtime_to_GS()
     
 
     print("==============Done==============")
@@ -840,7 +842,12 @@ def TCA_timestamp_to_GS(start,end):
     timestamp_df=timestamp_df.append({'start' : start , 'end' : end} , ignore_index=True)
     TCA_upload_to_google('TCA2','Timestamp',timestamp_df) # upload to google sheet
 ##=================================================================================================================  
-  
+def TCA_uploadtime_to_GS(): 
+    timestamp_df=download_from_google('TCA2','Timestamp')   
+    timestamp_df.loc[0,'upload']= datetime.now()
+    #print('uploadtime = ',timestamp_df[1,'upload'])
+    TCA_upload_to_google('TCA2','Timestamp',timestamp_df) # upload to google sheet
+##=================================================================================================================    
 def TCA_confirm_delay(delay_time): 
     print('delay_time = ',delay_time)
     while (delay_time>0):
